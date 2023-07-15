@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Calendario</title>
+  <style>
+    table {
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid black;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    td:hover {
+      background-color: #e6e6e6;
+      cursor: pointer;
+    }
+  </style>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+  <h1>Calendario</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Domenica</th>
+        <th>Lunedì</th>
+        <th>Martedì</th>
+        <th>Mercoledì</th>
+        <th>Giovedì</th>
+        <th>Venerdì</th>
+        <th>Sabato</th>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+
+  <script>
+    // Funzione per aggiungere un evento
+    function addEvent(date) {
+      var eventName = prompt('Inserisci il nome dell\'evento:');
+      if (eventName) {
+        var eventData = { date: date, event: eventName };
+        $.ajax({
+          url: '/addevent',
+          method: 'POST',
+          data: eventData,
+          success: function(response) {
+            console.log(response.status);
+            updateCalendar();
+          },
+          error: function(error) {
+            console.log(error);
+          }
+        });
+      }
+    }
+
+    // Funzione per ottenere l'evento corrispondente alla data
+    function getEventByDate(date) {
+      // ...
+    }
+
+    // Funzione per aggiornare il calendario con gli eventi
+    function updateCalendar() {
+      var calendarBody = document.querySelector('tbody');
+      calendarBody.innerHTML = '';
+
+      var currentDate = new Date();
+      var currentMonth = currentDate.getMonth();
+      var currentYear = currentDate.getFullYear();
+
+      var numDays = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+      var dayCounter = 1;
+      for (var row = 1; row <= 5; row++) {
+        var tableRow = document.createElement('tr');
+        for (var col = 1; col <= 7; col++) {
+          if (dayCounter <= numDays) {
+            var date = currentYear + '-' + (currentMonth + 1) + '-' + dayCounter;
+            var tableData = document.createElement('td');
+            tableData.onclick = function() {
+              addEvent(this.getAttribute('data-date'));
+            };
+
+            tableData.innerHTML = '<span>' + dayCounter + '</span>';
+
+            var event = getEventByDate(date);
+            if (event) {
+              tableData.innerHTML += '<br><span class="event">' + event + '</span>';
+            }
+
+            tableData.setAttribute('data-date', date);
+            tableRow.appendChild(tableData);
+            dayCounter++;
+          } else {
+            tableRow.innerHTML += '<td></td>';
+          }
+        }
+        calendarBody.appendChild(tableRow);
+      }
+    }
+
+    // Chiamata alla funzione per inizializzare il calendario
+    updateCalendar();
+  </script>
+</body>
+</html>

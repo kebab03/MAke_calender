@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Calendario</title>
+  <style>
+    table {
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid black;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    td:hover {
+      background-color: #e6e6e6;
+      cursor: pointer;
+    }
+  </style>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+  <h1>Calendario</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Domenica</th>
+        <th>Lunedì</th>
+        <th>Martedì</th>
+        <th>Mercoledì</th>
+        <th>Giovedì</th>
+        <th>Venerdì</th>
+        <th>Sabato</th>
+      </tr>
+    </thead>
+    <tbody id="calendar-body"></tbody>
+  </table>
+
+  <script>
+    // Funzione per aggiungere un evento
+    function addEvent(date) {
+      var eventName = prompt('Inserisci il nome dell\'evento:');
+      if (eventName) {
+        var eventData = { date: date, event: eventName };
+        $.ajax({
+          url: '/addevent',
+          method: 'POST',
+          data: eventData,
+          success: function(response) {
+            console.log(response.status);
+            updateCalendar();
+          },
+          error: function(error) {
+            console.log(error);
+          }
+        });
+      }
+    }
+
+    // Funzione per ottenere gli eventi corrispondenti alla data dal database
+    function getEventsByDate(date) { window.alert("getEventsByDate")
+          //console.log("events",events)
+  var events = [];
+  $.ajax({
+    url: '/getevents',
+    method: 'GET',
+    data: { date: date },
+    success: function(response) {
+       window.alert("getEveBntse html line 70 fine")
+      events = response.events;
+      window.alert("events ::--"+events)
+      //window.alert(events)
+    },
+    error: function(error) {window.alert(">Erroe")
+      console.log(error);
+    },
+    contentType: 'application/json'
+    //async: true,
+    //crossOrigin: true
+  });
+  window.alert("events  line 83 ::--="+events)
+  return events;
+}
+
+
+    // Funzione per aggiornare il calendario con gli eventi
+    function updateCalendar() {window.alert("events  line 89 ::--=")
+      var calendarBody = document.querySelector('#calendar-body');
+      calendarBody.innerHTML = '';
+
+      var currentDate = new Date();
+      var currentMonth = currentDate.getMonth();
+      var currentYear = currentDate.getFullYear();
+
+      var numDays = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+      var dayCounter = 1;
+      for (var row = 1; row <= 5; row++) {
+        var tableRow = document.createElement('tr');
+        for (var col = 1; col <= 7; col++) {
+          if (dayCounter <= numDays) {
+            var date = currentYear + '-' + (currentMonth + 1) + '-' + dayCounter;
+            var tableData = document.createElement('td');
+            tableData.onclick = function() {
+              addEvent(this.getAttribute('data-date'));
+            };
+
+            tableData.innerHTML = '<span>' + dayCounter + '</span>';
+
+            var events = getEventsByDate(date);
+            if (events.length > 0) {
+              for (var i = 0; i < events.length; i++) {
+                tableData.innerHTML += '<br><span class="event">' + events[i].event + '</span>';
+              }
+            }
+
+            tableData.setAttribute('data-date', date);
+            tableRow.appendChild(tableData);
+            dayCounter++;
+          } else {
+            tableRow.innerHTML += '<td></td>';
+          }
+        }
+        window.alert("events  line 83 ::--="+date)
+        calendarBody.appendChild(tableRow);
+      }
+    }
+
+    // Funzione per caricare il calendario all'avvi
+    updateCalendar();
+  </script>
+</body>
+</html>
